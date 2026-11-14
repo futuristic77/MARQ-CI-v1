@@ -110,6 +110,76 @@
 .adm-public-wrap .mq-live-heading {
   margin-top: 50px;
 }
+.adm-brand-looks {
+  margin: 0 0 54px;
+}
+.adm-brand-look-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.adm-brand-look {
+  overflow: hidden;
+  border: 1px solid #ebe7e1;
+  background: #fff;
+}
+.adm-brand-look-image {
+  position: relative;
+  display: block;
+  aspect-ratio: 1.12;
+  overflow: hidden;
+  background: #eeece8;
+}
+.adm-brand-look-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.adm-brand-look-image:hover img {
+  transform: scale(1.025);
+}
+.adm-brand-look-image span {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 9px 12px;
+  background: #faf9f7;
+  color: #24221e;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.adm-brand-look-info {
+  padding: 15px;
+}
+.adm-brand-look-info h3 {
+  margin: 0;
+  color: #25231f;
+  font:
+    400 20px Georgia,
+    serif;
+}
+.adm-brand-look-info p {
+  margin: 7px 0;
+  color: #79736b;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.adm-brand-look-info ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-brand-look-info li {
+  padding: 6px 8px;
+  background: #f4f1ed;
+  color: #5a554e;
+  font-size: 9px;
+}
 .adm-product-card p {
   margin: 7px 0;
   color: #807970;
@@ -136,5 +206,12 @@
   .adm-gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+  }
+  .adm-brand-look-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .adm-brand-look-image {
+    aspect-ratio: 0.95;
   }
 }

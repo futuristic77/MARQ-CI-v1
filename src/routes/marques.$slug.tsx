@@ -40,6 +40,25 @@ type Brand = {
   cover_url: string;
   gallery_urls: string[];
 };
+type BrandLook = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  model_image_url: string;
+  original_image_url: string;
+  look_products: {
+    pin_number: number;
+    pin_x: number;
+    pin_y: number;
+    products: {
+      id: string;
+      name: string;
+      brand_id: string;
+      photo_urls: string[];
+    };
+  }[];
+};
 
 function BrandProfile() {
   const { slug } = Route.useParams();
@@ -70,6 +89,23 @@ function BrandProfile() {
       if (error) throw error;
       return (data ?? []) as Product[];
     },
+  });
+  const looksQuery = useQuery({
+    queryKey: ["public", "brand-looks", brand?.id],
+    enabled: Boolean(brand?.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("looks")
+        .select(
+          "id,name,slug,description,model_image_url,original_image_url,look_products!inner(pin_number,pin_x,pin_y,products!inner(id,name,brand_id,photo_urls))",
+        )
+        .eq("status", "published")
+        .eq("look_products.products.brand_id", brand!.id)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as BrandLook[];
+    },
+    staleTime: 60_000,
   });
   return (
     <main className="adm-public-main">
@@ -125,6 +161,49 @@ function BrandProfile() {
                 ))}
               </div>
             )}
+            <section className="adm-brand-looks" aria-labelledby="brand-looks-title">
+              <div className="mq-live-heading">
+                <span className="mq-kicker">Portés dans le lookbook</span>
+                <h2 id="brand-looks-title">Les silhouettes de la maison.</h2>
+                <p>
+                  Retrouvez les looks du défilé où apparaissent les pièces publiées de {brand.name}.
+                </p>
+              </div>
+              {looksQuery.isLoading ? (
+                <p className="adm-public-empty">Recherche des silhouettes…</p>
+              ) : looksQuery.data?.length ? (
+                <div className="adm-brand-look-grid">
+                  {looksQuery.data.map((look) => (
+                    <article className="adm-brand-look" key={look.id}>
+                      <a className="adm-brand-look-image" href="/#lookbook">
+                        <img
+                          src={look.model_image_url || look.original_image_url}
+                          alt={`${look.name}, mannequin portant une pièce de ${brand.name}`}
+                          loading="lazy"
+                        />
+                        <span>Voir le lookbook</span>
+                      </a>
+                      <div className="adm-brand-look-info">
+                        <h3>{look.name}</h3>
+                        {look.description && <p>{look.description}</p>}
+                        <ul aria-label={`Articles de ${brand.name} dans le look ${look.name}`}>
+                          {look.look_products
+                            .filter((item) => item.products?.brand_id === brand.id)
+                            .map((item) => (
+                              <li key={item.products.id}>{item.products.name}</li>
+                            ))}
+                        </ul>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="adm-public-empty">
+                  Les silhouettes de {brand.name} apparaîtront ici dès qu&apos;une de ses pièces
+                  sera publiée dans un lookbook.
+                </p>
+              )}
+            </section>
             <section aria-labelledby="brand-products-title">
               <div className="mq-live-heading">
                 <span className="mq-kicker">La sélection</span>
