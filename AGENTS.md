@@ -12,7 +12,7 @@ This repository uses the existing Supabase project as its only backend.
 - Do not expose Supabase service_role credentials in frontend code.
 - Never apply unversioned SQL changes directly to production.
 - GitHub is the source of truth for application code and database migrations.
-- Supabase remains the backend infrastructure..
+- Supabase remains the backend infrastructure.
 <!-- LOVABLE:END -->
 
 ## Project rules
