@@ -1,0 +1,83 @@
+/* MARQ’CI — header, brands strip, footer, styling bag dialog and toast. */
+
+.site-header {
+  height: 88px; padding: 0 40px; display: flex; align-items: center; gap: 32px;
+  border-bottom: 1px solid var(--border); background: var(--background); position: relative; z-index: 50;
+}
+.brand {
+  margin-right: auto; display: inline-flex; align-items: baseline; font-family: var(--font-sans);
+  font-weight: 700; font-size: 22px; letter-spacing: -0.045em; line-height: 1; color: var(--foreground);
+}
+.brand__tick { color: var(--accent-warm); margin: 0 0.02em; }
+.site-nav { display: flex; gap: 28px; font-size: 14px; font-weight: 600; font-family: var(--font-nav); }
+.site-nav a { padding: 12px 0; }
+.site-nav a:hover, .site-nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 4px; }
+.bag-btn {
+  display: flex; align-items: center; justify-content: center; gap: 5px; background: none; border: 0; padding: 0;
+  min-width: 44px; min-height: 44px; cursor: pointer; color: var(--foreground);
+}
+.bag-btn span { font-size: 10px; font-variant-numeric: tabular-nums; }
+@media (max-width: 749px) {
+  .site-header { height: 68px; padding: 0 20px; gap: 18px; }
+  .brand { font-size: 18px; }
+  .site-nav { gap: 14px; font-size: 11px; }
+  .site-nav a { padding: 15px 0; }
+  .bag-btn { margin-left: 8px; }
+}
+@media (max-width: 374px) { .site-nav a:first-child { display: none; } }
+
+/* brands */
+.mq-brands { padding: 96px 56px 104px; border-top: 1px solid var(--line); background: var(--background); }
+.mq-brands__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 48px; flex-wrap: wrap; }
+.mq-kicker { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted-foreground); }
+.mq-brands__title { margin: 12px 0 0; font-weight: 400; font-size: clamp(30px, 4.2vw, 46px); line-height: 1; letter-spacing: -0.02em; }
+.mq-brands__lead { margin: 0; max-width: 42ch; font-size: 13px; line-height: 1.6; color: var(--muted-foreground); }
+.mq-brands__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.mq-brand { padding: 28px 28px 32px 0; display: flex; flex-direction: column; gap: 10px; }
+.mq-brand + .mq-brand { padding-left: 28px; border-left: 1px solid var(--line); }
+.mq-brand__num { font-size: 10px; letter-spacing: 0.16em; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.mq-brand__name { margin: 0; font-weight: 500; font-size: 20px; letter-spacing: -0.01em; }
+.mq-brand__craft { font-size: 13px; }
+.mq-brand__city { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-foreground); }
+@media (max-width: 749px) {
+  .mq-brands { padding: 64px 20px 72px; }
+  .mq-brands__head { margin-bottom: 32px; }
+  .mq-brands__list { grid-template-columns: 1fr; }
+  .mq-brand, .mq-brand + .mq-brand { padding: 22px 0; border-left: 0; border-bottom: 1px solid var(--line); }
+}
+
+.mq-footer {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 28px 56px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted-foreground);
+}
+.mq-footer strong { color: var(--foreground); font-weight: 700; letter-spacing: -0.03em; font-size: 14px; }
+@media (max-width: 749px) { .mq-footer { padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); } }
+
+/* styling bag */
+.bag-dialog {
+  border: 1px solid var(--border); background: var(--background); color: var(--foreground); padding: 24px;
+  width: min(560px, 100vw - 32px); max-height: 85dvh; overflow-y: auto; margin: auto;
+}
+.bag-dialog::backdrop { background: oklch(0 0 0 / 0.33); backdrop-filter: blur(4px); }
+.bag-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.bag-heading h2 { font-size: 25px; font-weight: 400; margin: 0; letter-spacing: -0.01em; }
+.bag-close { font-size: 28px; width: 44px; height: 44px; background: none; border: 0; cursor: pointer; color: inherit; line-height: 1; }
+.bag-note { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; }
+.bag-row { display: grid; grid-template-columns: 60px 1fr auto; gap: 18px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+.bag-row img { width: 60px; height: 80px; object-fit: cover; background: var(--muted); }
+.bag-row h3 { font-size: 14px; font-weight: 400; margin: 4px 0 8px; }
+.bag-row p { font-size: 12px; margin: 0; }
+.bag-brand { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-foreground); }
+.bag-remove { font-size: 20px; padding: 12px; background: none; border: 0; cursor: pointer; color: inherit; }
+.bag-total { text-align: right; font-size: 15px; padding: 12px 0; margin: 0; }
+.bag-export {
+  background: var(--foreground); color: var(--primary-foreground); border: 0; padding: 16px 20px; width: 100%;
+  font: inherit; font-size: 13px; cursor: pointer;
+}
+.bag-export:disabled { opacity: 0.4; cursor: default; }
+.bag-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--foreground); color: var(--primary-foreground);
+  padding: 12px 20px; font-size: 12px; z-index: 2147483002; opacity: 0; transition: opacity 0.25s; pointer-events: none; white-space: nowrap;
+}
+.bag-toast.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .bag-toast { transition: none; } }
