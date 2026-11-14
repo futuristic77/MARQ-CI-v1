@@ -217,14 +217,14 @@ function LookPanel({ look, index }: { look: Look; index: number }) {
                 </span>
               )}
               <span className="rw__media" aria-hidden="true">
-                <img src={product.image} loading="lazy" decoding="async" alt="" width={800} height={1008} />
+                <img src={product.photos[0].src} loading="lazy" decoding="async" alt="" width={800} height={1008} />
                 <span className="rw__num">{num}</span>
               </span>
               <div className="rw__info">
                 <span className="rw__type">{product.brand}</span>
                 <span className="rw__name">{product.name}</span>
                 <span className="rw__price">
-                  <span>{formatFCFA(product.price)}</span>
+                  <span>{formatFCFA(product.priceFCFA)}</span>
                 </span>
               </div>
               <button
@@ -248,10 +248,10 @@ function LookPanel({ look, index }: { look: Look; index: number }) {
               </button>
               <div className="rw__picker" id={pickerId} data-rw-picker="" hidden>
                 <div className="rw__picker-head">
-                  <img src={product.image} alt="" width={160} height={202} loading="lazy" />
+                  <img src={product.photos[0].src} alt="" width={160} height={202} loading="lazy" />
                   <div>
                     <span className="rw__picker-title">{product.name}</span>
-                    <span className="rw__picker-price">{formatFCFA(product.price)}</span>
+                    <span className="rw__picker-price">{formatFCFA(product.priceFCFA)}</span>
                   </div>
                   <button type="button" className="rw__picker-close" data-rw-pick-close="" aria-label="Fermer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">

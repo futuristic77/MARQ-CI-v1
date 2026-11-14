@@ -10,29 +10,60 @@ import hoodieYop from "@/assets/products/hoodie-yop.jpg";
 /** Remote cut-out model photos (transparent WebP) from the original runway export. */
 export const MODEL_BASE = "https://reel-ref-try-the-look.vercel.app/assets";
 
-export const SHOE_PRICE = 55000;
-export const APPAREL_PRICE = 30000;
 export const BUNDLE_DISCOUNT = 0.1;
 
-export type Brand = { id: string; name: string; craft: string; city: string };
-
-export const BRANDS: Brand[] = [
-  { id: "akwaba", name: "Atelier Akwaba", craft: "Sneakers montées à la main", city: "Treichville" },
-  { id: "lagune", name: "Lagune Studio", craft: "Coton lourd & sérigraphie", city: "Grand-Bassam" },
-  { id: "gbeke", name: "Maison Gbêkê", craft: "Hoodies & tissages", city: "Bouaké" },
-];
-
+export type CatalogPhoto = { src: string; alt?: string };
+export type Brand = {
+  id: string;
+  name: string;
+  creatorName?: string;
+  craft: string;
+  city: string;
+  photos?: CatalogPhoto[];
+};
+export type Collection = {
+  id: string;
+  brandId: string;
+  name: string;
+  description?: string;
+  photos?: CatalogPhoto[];
+};
 export type Variant = { id: number; size: string };
 export type Product = {
   id: string;
   name: string;
+  brandId: string;
+  collectionId?: string;
   brand: string;
-  price: number;
+  description?: string;
+  priceFCFA: number;
   option: "Pointure" | "Taille";
-  image: string;
+  photos: [CatalogPhoto, ...CatalogPhoto[]];
   variants: Variant[];
 };
 
+const brands: Brand[] = [
+  {
+    id: "akwaba",
+    name: "Atelier Akwaba",
+    craft: "Sneakers montées à la main",
+    city: "Treichville",
+  },
+  {
+    id: "lagune",
+    name: "Lagune Studio",
+    craft: "Coton lourd & sérigraphie",
+    city: "Grand-Bassam",
+  },
+  {
+    id: "gbeke",
+    name: "Maison Gbêkê",
+    craft: "Hoodies & tissages",
+    city: "Bouaké",
+  },
+];
+
+const collections: Collection[] = [];
 const SHOE_SIZES = ["40", "41", "42", "43", "44", "45", "46"];
 const APPAREL_SIZES = ["S", "M", "L", "XL"];
 
@@ -40,34 +71,99 @@ function make(
   id: string,
   name: string,
   brandId: string,
-  kind: "shoe" | "apparel",
-  image: string,
+  priceFCFA: number,
+  option: Product["option"],
+  sizes: string[],
+  photo: string,
   base: number,
 ): Product {
-  const brand = BRANDS.find((b) => b.id === brandId)?.name ?? brandId;
-  const sizes = kind === "shoe" ? SHOE_SIZES : APPAREL_SIZES;
+  const brand = brands.find((entry) => entry.id === brandId)?.name ?? brandId;
   return {
     id,
     name,
+    brandId,
     brand,
-    price: kind === "shoe" ? SHOE_PRICE : APPAREL_PRICE,
-    option: kind === "shoe" ? "Pointure" : "Taille",
-    image,
+    priceFCFA,
+    option,
+    photos: [{ src: photo, alt: name }],
     variants: sizes.map((size, i) => ({ id: base * 100 + i + 1, size })),
   };
 }
 
-export const PRODUCTS: Record<string, Product> = Object.fromEntries(
+const products: Record<string, Product> = Object.fromEntries(
   [
-    make("sneaker-plateau", "Sneaker Plateau", "akwaba", "shoe", sneakerPlateau, 7101),
-    make("sneaker-treichville", "Sneaker Treichville", "akwaba", "shoe", sneakerTreichville, 7102),
-    make("sneaker-nuit", "Sneaker Nuit", "akwaba", "shoe", sneakerNuit, 7103),
-    make("tshirt-lagune", "T-shirt Lagune", "lagune", "apparel", tshirtLagune, 7201),
-    make("sweat-bassam", "Sweat Bassam", "lagune", "apparel", sweatBassam, 7202),
-    make("hoodie-banco", "Hoodie Banco", "gbeke", "apparel", hoodieBanco, 7301),
-    make("hoodie-cocody", "Hoodie Cocody", "gbeke", "apparel", hoodieCocody, 7302),
-    make("hoodie-yop", "Hoodie Yop", "gbeke", "apparel", hoodieYop, 7303),
-  ].map((p) => [p.id, p]),
+    make(
+      "sneaker-plateau",
+      "Sneaker Plateau",
+      "akwaba",
+      55000,
+      "Pointure",
+      SHOE_SIZES,
+      sneakerPlateau,
+      7101,
+    ),
+    make(
+      "sneaker-treichville",
+      "Sneaker Treichville",
+      "akwaba",
+      55000,
+      "Pointure",
+      SHOE_SIZES,
+      sneakerTreichville,
+      7102,
+    ),
+    make(
+      "sneaker-nuit",
+      "Sneaker Nuit",
+      "akwaba",
+      55000,
+      "Pointure",
+      SHOE_SIZES,
+      sneakerNuit,
+      7103,
+    ),
+    make(
+      "tshirt-lagune",
+      "T-shirt Lagune",
+      "lagune",
+      30000,
+      "Taille",
+      APPAREL_SIZES,
+      tshirtLagune,
+      7201,
+    ),
+    make(
+      "sweat-bassam",
+      "Sweat Bassam",
+      "lagune",
+      30000,
+      "Taille",
+      APPAREL_SIZES,
+      sweatBassam,
+      7202,
+    ),
+    make(
+      "hoodie-banco",
+      "Hoodie Banco",
+      "gbeke",
+      30000,
+      "Taille",
+      APPAREL_SIZES,
+      hoodieBanco,
+      7301,
+    ),
+    make(
+      "hoodie-cocody",
+      "Hoodie Cocody",
+      "gbeke",
+      30000,
+      "Taille",
+      APPAREL_SIZES,
+      hoodieCocody,
+      7302,
+    ),
+    make("hoodie-yop", "Hoodie Yop", "gbeke", 30000, "Taille", APPAREL_SIZES, hoodieYop, 7303),
+  ].map((product) => [product.id, product]),
 );
 
 export type Pin = { x: number; y: number };
@@ -89,7 +185,7 @@ const pins = (shoeTop = 92): [Pin, Pin, Pin] => [
   { x: 45, y: shoeTop },
 ];
 
-export const LOOKS: Look[] = [
+const looks: Look[] = [
   {
     key: "plateau",
     name: "Plateau",
@@ -148,6 +244,26 @@ export const LOOKS: Look[] = [
   },
 ];
 
+export type Catalog = {
+  brands: Brand[];
+  collections: Collection[];
+  products: Record<string, Product>;
+  looks: Look[];
+};
+
+export const CATALOG: Catalog = {
+  brands,
+  collections,
+  products,
+  looks,
+};
+export const {
+  brands: BRANDS,
+  collections: COLLECTIONS,
+  products: PRODUCTS,
+  looks: LOOKS,
+} = CATALOG;
+
 /** "115 000 FCFA" — thin no-break spaces so it never wraps and renders the same on server and browser. */
 export function formatFCFA(amount: number): string {
   const digits = String(Math.round(amount)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
@@ -155,12 +271,12 @@ export function formatFCFA(amount: number): string {
 }
 
 export function lookTotals(look: Look): { full: number; bundle: number } {
-  const full = look.products.reduce((sum, id) => sum + (PRODUCTS[id]?.price ?? 0), 0);
+  const full = look.products.reduce((sum, id) => sum + (CATALOG.products[id]?.priceFCFA ?? 0), 0);
   return { full, bundle: Math.round(full * (1 - BUNDLE_DISCOUNT)) };
 }
 
 export function findVariant(variantId: number): { product: Product; variant: Variant } | null {
-  for (const product of Object.values(PRODUCTS)) {
+  for (const product of Object.values(CATALOG.products)) {
     const variant = product.variants.find((v) => v.id === variantId);
     if (variant) return { product, variant };
   }

@@ -69,11 +69,11 @@ export function mountBag(): BagApi {
       const found = findVariant(e.id);
       if (!found) continue;
       const { product, variant } = found;
-      sum += product.price * e.quantity;
+      sum += product.priceFCFA * e.quantity;
       const row = document.createElement("div");
       row.className = "bag-row";
       const img = document.createElement("img");
-      img.src = product.image;
+      img.src = product.photos[0].src;
       img.alt = product.name;
       img.width = 60;
       img.height = 80;
@@ -84,7 +84,7 @@ export function mountBag(): BagApi {
       const h3 = document.createElement("h3");
       h3.textContent = product.name;
       const meta = document.createElement("p");
-      meta.textContent = `${product.option} ${variant.size} · Quantité ${e.quantity} · ${formatFCFA(product.price)}`;
+      meta.textContent = `${product.option} ${variant.size} · Quantité ${e.quantity} · ${formatFCFA(product.priceFCFA)}`;
       info.append(brand, h3, meta);
       const rm = document.createElement("button");
       rm.type = "button";
