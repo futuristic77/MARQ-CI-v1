@@ -176,11 +176,7 @@ function BrandProfile() {
                 <div className="adm-brand-look-grid">
                   {looksQuery.data.map((look) => (
                     <article className="adm-brand-look" key={look.id}>
-                      <a
-                        className="adm-brand-look-image"
-                        href={`/?look=${encodeURIComponent(look.id)}#lookbook`}
-                        aria-label={`Ouvrir le look ${look.name} dans le Lookbook`}
-                      >
+                      <a className="adm-brand-look-image" href="/#lookbook">
                         <img
                           src={look.model_image_url || look.original_image_url}
                           alt={`${look.name}, mannequin portant une pièce de ${brand.name}`}

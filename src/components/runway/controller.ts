@@ -1,5 +1,4 @@
 import type { BagApi } from "./bag";
-import type { Product } from "./data";
 
 type Body = {
   el: HTMLElement;
@@ -26,11 +25,7 @@ const MSG_ERROR = "Impossible d’ajouter au sac. Réessaie.";
  * autoplay, drag, custom cursor, "Voir le look" popup, size pickers and bundle add.
  * React renders the static markup once; this owns all motion and state afterwards.
  */
-export function mountRunway(
-  root: HTMLElement,
-  bag: BagApi,
-  requestedLookId?: string | null,
-): () => void {
+export function mountRunway(root: HTMLElement, bag: BagApi): () => void {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const n = Number(root.dataset["count"] || 6);
@@ -41,8 +36,7 @@ export function mountRunway(
   const START = reduced ? 0 : 1.15;
 
   const $ = <T extends Element>(s: string, r: ParentNode = root) => r.querySelector(s) as T;
-  const $$ = <T extends Element>(s: string, r: ParentNode = root) =>
-    Array.from(r.querySelectorAll(s)) as T[];
+  const $$ = <T extends Element>(s: string, r: ParentNode = root) => Array.from(r.querySelectorAll(s)) as T[];
 
   const stage = $<HTMLElement>("[data-rw-stage]");
   const actors = $<HTMLElement>("[data-rw-actors]");
@@ -125,9 +119,7 @@ export function mountRunway(
         }
         const foot = clamp((h - 1 - last) / h, 0, 0.4).toFixed(4);
         hero.style.setProperty("--rw-foot", foot);
-        bodies
-          .filter((b) => b.a % n === i)
-          .forEach((b) => b.el.style.setProperty("--rw-foot", foot));
+        bodies.filter((b) => b.a % n === i).forEach((b) => b.el.style.setProperty("--rw-foot", foot));
       } catch {
         /* tainted canvas: keep offset 0 */
       }
@@ -136,9 +128,8 @@ export function mountRunway(
   });
 
   // ---- state -------------------------------------------------------------------------------
-  const requestedIndex = heroes.findIndex((hero) => hero.dataset["lookKey"] === requestedLookId);
-  let index = requestedIndex >= 0 ? requestedIndex : 0;
-  let target = index;
+  let index = 0;
+  let target = 0;
   let cur = -START;
   let vel = 0;
   let mobile = window.innerWidth <= 749;
@@ -200,9 +191,7 @@ export function mountRunway(
     W = r.width;
     H = r.height;
     fs = ring ? 1.08 : 1;
-    const modelH = ring
-      ? Math.max(200, Math.round((H - 34 - 18) / 1.08))
-      : Math.max(200, Math.round(H - 24 - 18));
+    const modelH = ring ? Math.max(200, Math.round((H - 34 - 18) / 1.08)) : Math.max(200, Math.round(H - 24 - 18));
     const hx = ring ? 0.5 * W : 0.3 * W;
     const hy = ring ? 34 : 22;
     stage.style.setProperty("--rw-model-h", `${modelH}px`);
@@ -224,15 +213,7 @@ export function mountRunway(
     return Math.max(90, W * 0.32 * 1.6);
   }
 
-  function put(
-    b: Body,
-    x: number,
-    bottom: number,
-    scale: number,
-    op: number,
-    blur: number,
-    z: number,
-  ) {
+  function put(b: Body, x: number, bottom: number, scale: number, op: number, blur: number, z: number) {
     const half = (b.w * scale) / 2;
     if (x + half < -4 || x - half > W + 4) op = 0;
     const s = b.el.style;
@@ -273,13 +254,7 @@ export function mountRunway(
   }
 
   function renderLine() {
-    const ax = 0.3,
-      ay = 22,
-      sx = 0.32,
-      sy = 22,
-      sr = 0.76,
-      ex = 0.55,
-      d = 4;
+    const ax = 0.3, ay = 22, sx = 0.32, sy = 22, sr = 0.76, ex = 0.55, d = 4;
     for (const b of bodies) {
       let k = b.x;
       let e = -1;
@@ -293,27 +268,11 @@ export function mountRunway(
         else e = 2 * (1 - u) * 1.4;
       } else if (k < 0) e = Math.min(-k, 1.4);
       if (e >= 0) {
-        put(
-          b,
-          W * (ax - ex * e),
-          ay - 22 * e,
-          1 + 0.14 * e,
-          Math.max(0, 1 - 1.05 * e),
-          4 * Math.min(e, 1),
-          1100,
-        );
+        put(b, W * (ax - ex * e), ay - 22 * e, 1 + 0.14 * e, Math.max(0, 1 - 1.05 * e), 4 * Math.min(e, 1), 1100);
       } else {
         let op = k <= d - 1 ? 1 - 0.13 * k : Math.max(0, 0.61 * (d - k));
         if (still && Math.abs(k) < 0.02) op = 0;
-        put(
-          b,
-          W * (ax + sx * k),
-          ay + sy * k,
-          Math.pow(sr, k),
-          op,
-          Math.min(0.9 * k, 3.2),
-          1000 - Math.round(10 * k),
-        );
+        put(b, W * (ax + sx * k), ay + sy * k, Math.pow(sr, k), op, Math.min(0.9 * k, 3.2), 1000 - Math.round(10 * k));
       }
     }
   }
@@ -364,11 +323,7 @@ export function mountRunway(
         b.x += b.v * h;
       }
       if (b.trip && Math.abs(b.x - goal) < 0.02) b.trip = false;
-      if (
-        Math.abs(b.x - goal) < 0.0006 &&
-        Math.abs(b.v) < 0.0006 &&
-        Math.abs(b.g - goal) < 0.0006
-      ) {
+      if (Math.abs(b.x - goal) < 0.0006 && Math.abs(b.v) < 0.0006 && Math.abs(b.g - goal) < 0.0006) {
         b.x = b.g = goal;
         b.v = 0;
       } else settled = false;
@@ -499,8 +454,7 @@ export function mountRunway(
     timer = window.setTimeout(onTimer, SPEED);
   }
   function onTimer() {
-    if (playing && visible && !dragging && !document.hidden && !panelHover && !zoomed && !engaged)
-      next();
+    if (playing && visible && !dragging && !document.hidden && !panelHover && !zoomed && !engaged) next();
     else restartBar();
   }
   function play(on: boolean) {
@@ -547,33 +501,14 @@ export function mountRunway(
   let host: HTMLElement | null = null;
   let sheetCard: HTMLElement | null = null;
   const pickerOf = (card: HTMLElement) =>
-    document.getElementById(
-      card.querySelector("[data-rw-add]")?.getAttribute("aria-controls") || "",
-    ) as HTMLElement | null;
+    document.getElementById(card.querySelector("[data-rw-add]")?.getAttribute("aria-controls") || "") as HTMLElement | null;
   const cardOfPicker = (picker: HTMLElement) =>
-    root
-      .querySelector<HTMLElement>(`[aria-controls="${picker.id}"]`)
-      ?.closest<HTMLElement>("[data-rw-card]") || null;
+    root.querySelector<HTMLElement>(`[aria-controls="${picker.id}"]`)?.closest<HTMLElement>("[data-rw-card]") || null;
 
   const SHEET_VARS = [
-    "--rw-panel",
-    "--rw-text",
-    "--rw-muted",
-    "--rw-line",
-    "--rw-accent",
-    "--rw-on-accent",
-    "--rw-btn-bg",
-    "--rw-btn-fg",
-    "--rw-btn-radius",
-    "--rw-pill-radius",
-    "--rw-bar-r",
-    "--rw-thumb-radius",
-    "--rw-pt-size",
-    "--rw-price",
-    "--rw-opt",
-    "--rw-ease",
-    "--rw-ease-sheet",
-    "--rw-ease-spring",
+    "--rw-panel", "--rw-text", "--rw-muted", "--rw-line", "--rw-accent", "--rw-on-accent", "--rw-btn-bg",
+    "--rw-btn-fg", "--rw-btn-radius", "--rw-pill-radius", "--rw-bar-r", "--rw-thumb-radius", "--rw-pt-size",
+    "--rw-price", "--rw-opt", "--rw-ease", "--rw-ease-sheet", "--rw-ease-spring",
   ];
   function ensureHost() {
     if (host) return host;
@@ -695,14 +630,7 @@ export function mountRunway(
       () => {
         if (destroyed) return;
         try {
-          const selections = cards.map((card) => {
-            const product = JSON.parse(card.dataset["product"] || "null") as Product | null;
-            const selectedId = card.dataset["selected"];
-            const variant = product?.variants.find((item) => String(item.id) === selectedId);
-            if (!product || !variant) throw new Error("Choisis une taille disponible.");
-            return { id: variant.id, quantity: 1, product, variant };
-          });
-          bag.add(selections);
+          bag.add(cards.map((c) => ({ id: Number(c.dataset["selected"]), quantity: 1 })));
           cards.forEach(markAdded);
         } catch {
           cards.forEach((c) => c.classList.remove("is-loading"));
@@ -727,10 +655,7 @@ export function mountRunway(
     if (pending.length) {
       (mobile ? pending.slice(0, 1) : pending).forEach((c) => openPicker(c));
       if (!mobile && pending[0]) reveal(pending[0]);
-      setMsg(
-        panel,
-        MSG_CHOOSE.replace("[items]", pending.map((c) => c.dataset["title"]).join(", ")),
-      );
+      setMsg(panel, MSG_CHOOSE.replace("[items]", pending.map((c) => c.dataset["title"]).join(", ")));
     }
   }
 
@@ -815,10 +740,7 @@ export function mountRunway(
       return;
     }
     if (c("[data-rw-zoom-close]")) return closeLb();
-    if (
-      zoomed &&
-      (t === lb || t === lbStage || (c("[data-rw-lb]") && !c(".rw__lb-model") && !c(".rw__lb-top")))
-    )
+    if (zoomed && (t === lb || t === lbStage || (c("[data-rw-lb]") && !c(".rw__lb-model") && !c(".rw__lb-top"))))
       return closeLb();
     if (c("[data-rw-zoom]")) return openLb();
     if (c("[data-rw-next]")) return next();
@@ -846,8 +768,7 @@ export function mountRunway(
     if (confirm) {
       const picker = confirm.closest<HTMLElement>("[data-rw-picker]");
       const card = picker ? cardOfPicker(picker) : null;
-      if (!card || card.classList.contains("is-added") || card.classList.contains("is-loading"))
-        return;
+      if (!card || card.classList.contains("is-added") || card.classList.contains("is-loading")) return;
       syncSelection(card, true);
       const panel = card.closest<HTMLElement>("[data-rw-panel]")!;
       setMsg(panel, "");
@@ -906,26 +827,12 @@ export function mountRunway(
   }
 
   // drag
-  type Ptr = {
-    id: number;
-    x0: number;
-    y0: number;
-    t: number;
-    drag: boolean;
-    samples: { x: number; t: number }[];
-  };
+  type Ptr = { id: number; x0: number; y0: number; t: number; drag: boolean; samples: { x: number; t: number }[] };
   let ptr: Ptr | null = null;
   function onDown(e: PointerEvent) {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     if (zoomed) return;
-    ptr = {
-      id: e.pointerId,
-      x0: e.clientX,
-      y0: e.clientY,
-      t: target,
-      drag: false,
-      samples: [{ x: e.clientX, t: e.timeStamp }],
-    };
+    ptr = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t: target, drag: false, samples: [{ x: e.clientX, t: e.timeStamp }] };
   }
   function onMove(e: PointerEvent) {
     if (e.pointerType === "mouse") moveCursor(e);
@@ -997,12 +904,7 @@ export function mountRunway(
   }
 
   // custom cursor
-  let cx = 0,
-    cy = 0,
-    tx = 0,
-    ty = 0,
-    cOn = false,
-    craf = 0;
+  let cx = 0, cy = 0, tx = 0, ty = 0, cOn = false, craf = 0;
   if (!finePointer) cursor?.remove();
   else root.classList.add("rw--cursor");
   function cursorLoop() {
@@ -1112,7 +1014,7 @@ export function mountRunway(
   cur = ring ? -START : target;
   initLine(START);
   $$<HTMLElement>("[data-rw-card]").forEach((card) => syncSelection(card, false));
-  setIndex(index, true);
+  setIndex(0, true);
   renderAll();
   if (!reduced) play(true);
   kick();
@@ -1165,14 +1067,6 @@ export function mountRunway(
     dockAll();
     host?.remove();
     clones.forEach((c) => c.remove());
-    root.classList.remove(
-      "rw--js",
-      "rw--still",
-      "rw--cursor",
-      "rw--zoom",
-      "is-playing",
-      "is-revealed",
-      "is-dragging",
-    );
+    root.classList.remove("rw--js", "rw--still", "rw--cursor", "rw--zoom", "is-playing", "is-revealed", "is-dragging");
   };
 }
