@@ -6,6 +6,7 @@ import { Runway } from "@/components/runway/Runway";
 import { mountBag } from "@/components/runway/bag";
 import { mountRunway } from "@/components/runway/controller";
 import { BRANDS, LOOKS, PRODUCTS } from "@/components/runway/data";
+import { LiveDirectory } from "@/components/public/LiveDirectory";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "MARQ’CI — Les marques indépendantes ivoiriennes" },
       {
         property: "og:description",
-        content: "Explore le défilé MARQ’CI : six looks, de la tête aux pieds, par des créateurs indépendants d’ici.",
+        content:
+          "Explore le défilé MARQ’CI : six looks, de la tête aux pieds, par des créateurs indépendants d’ici.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -57,8 +59,8 @@ function Index() {
               </h2>
             </div>
             <p className="mq-brands__lead">
-              MARQ’CI met en lumière les marques indépendantes ivoiriennes : des ateliers à taille humaine, des
-              pièces pensées pour durer.
+              MARQ’CI met en lumière les marques indépendantes ivoiriennes : des ateliers à taille
+              humaine, des pièces pensées pour durer.
             </p>
           </div>
           <ul className="mq-brands__list">
@@ -77,10 +79,12 @@ function Index() {
             })}
           </ul>
         </section>
+        <LiveDirectory />
       </main>
       <footer className="mq-footer">
         <strong>MARQ’CI</strong>
         <span>Les marques indépendantes ivoiriennes, à l’honneur.</span>
+        <a href="/admin">Espace administration</a>
       </footer>
       <BagDialog />
     </>

@@ -1,0 +1,140 @@
+.mq-live-directory {
+  border-top: 1px solid #e8e4dd;
+  background: #faf9f7;
+  padding: clamp(48px, 8vw, 100px) 0;
+}
+.mq-live-inner {
+  width: min(1100px, calc(100% - 64px));
+  margin: 0 auto;
+}
+.mq-live-heading {
+  margin-bottom: 22px;
+}
+.mq-live-heading h2 {
+  margin: 8px 0 0;
+  color: #24221e;
+  font:
+    400 clamp(27px, 4vw, 42px)/1.1 Georgia,
+    serif;
+  letter-spacing: -0.045em;
+}
+.mq-live-heading p {
+  max-width: 500px;
+  color: #777169;
+  font-size: 12px;
+  line-height: 1.75;
+}
+.mq-live-brand-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.mq-live-brand {
+  display: block;
+  border: 1px solid #ebe7e1;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+}
+.mq-live-brand:hover {
+  transform: translateY(-3px);
+  border-color: #cfc5b9;
+}
+.mq-live-brand-image {
+  display: grid;
+  aspect-ratio: 1.45;
+  place-items: center;
+  overflow: hidden;
+  background: #eeece8;
+  color: #9d5f45;
+  font:
+    400 48px Georgia,
+    serif;
+}
+.mq-live-brand-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mq-live-brand-meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px;
+}
+.mq-live-brand-city {
+  color: #928b82;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mq-live-brand-meta h3 {
+  margin: 6px 0 4px;
+  color: #25231f;
+  font:
+    400 20px Georgia,
+    serif;
+}
+.mq-live-brand-meta p {
+  max-width: 260px;
+  margin: 0;
+  color: #79736b;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.mq-live-arrow {
+  color: #9d5f45;
+  font-size: 15px;
+}
+.adm-public-byline {
+  margin: 3px 0 !important;
+  color: #5a554e !important;
+  font-size: 11px !important;
+}
+.adm-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 54px;
+}
+.adm-gallery-grid img {
+  width: 100%;
+  aspect-ratio: 1.2;
+  object-fit: cover;
+  background: #f4f1ed;
+}
+.adm-public-wrap .mq-live-heading {
+  margin-top: 50px;
+}
+.adm-product-card p {
+  margin: 7px 0;
+  color: #807970;
+  font-size: 9px;
+  line-height: 1.6;
+}
+@media (max-width: 680px) {
+  .mq-live-inner {
+    width: calc(100% - 36px);
+  }
+  .mq-live-brand-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .mq-live-brand-meta {
+    padding: 11px;
+  }
+  .mq-live-brand-meta h3 {
+    font-size: 17px;
+  }
+  .mq-live-brand-meta p {
+    font-size: 9px;
+  }
+  .adm-gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}

@@ -1,0 +1,53 @@
+.adm-pin-manager {
+  margin-top: 16px;
+}
+.adm-pin-manager .adm-card-head {
+  align-items: flex-end;
+}
+.adm-pin-manager .adm-card-head h2 {
+  margin: 5px 0 0;
+}
+.adm-pin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.adm-pin-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #eeeae5;
+  background: #fdfcfb;
+  padding: 14px;
+}
+.adm-pin-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #9d5f45;
+  font-size: 10px;
+  font-weight: 600;
+}
+.adm-pin-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.adm-pin-manager .adm-section-note {
+  margin: 0 0 14px;
+}
+.adm-pin-manager .adm-field {
+  font-size: 9px;
+}
+@media (max-width: 760px) {
+  .adm-pin-grid {
+    grid-template-columns: 1fr;
+  }
+  .adm-pin-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .adm-pin-label {
+    grid-column: 1/-1;
+  }
+}
