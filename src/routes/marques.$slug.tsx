@@ -101,6 +101,7 @@ function BrandProfile() {
         )
         .eq("status", "published")
         .eq("look_products.products.brand_id", brand!.id)
+        .eq("look_products.products.status", "published")
         .order("display_order", { ascending: true });
       if (error) throw error;
       return (data ?? []) as unknown as BrandLook[];
