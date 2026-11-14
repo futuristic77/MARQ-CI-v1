@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef } from "react";
 
 import { BagDialog, SiteHeader } from "@/components/SiteChrome";
 import { Runway } from "@/components/runway/Runway";
 import { mountBag } from "@/components/runway/bag";
 import { mountRunway } from "@/components/runway/controller";
-import { BRANDS, LOOKS, PRODUCTS } from "@/components/runway/data";
+import { BRANDS, CATALOG, LOOKS, PRODUCTS } from "@/components/runway/data";
+import { toRunwayCatalog, type LiveLook } from "@/components/runway/live-catalog";
+import { supabase } from "@/lib/supabase";
 import { LiveDirectory } from "@/components/public/LiveDirectory";
 
 export const Route = createFileRoute("/")({
@@ -33,23 +36,48 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const runwayRef = useRef<HTMLDivElement>(null);
+  const runwayQuery = useQuery({
+    queryKey: ["public", "runway-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("looks")
+        .select(
+          "id,name,slug,description,model_image_url,original_image_url,display_order,look_products!inner(pin_number,pin_x,pin_y,products!inner(id,name,brand_id,description,category,price_cfa,photo_urls,sizes,status,brands!inner(id,name,status)))",
+        )
+        .eq("status", "published")
+        .eq("look_products.products.status", "published")
+        .eq("look_products.products.brands.status", "published")
+        .order("display_order", { ascending: true })
+        .order("pin_number", { ascending: true, referencedTable: "look_products" });
+      if (error) throw error;
+      return (data ?? []) as unknown as LiveLook[];
+    },
+    staleTime: 60_000,
+  });
+  const liveCatalog = useMemo(
+    () => (runwayQuery.data?.length ? toRunwayCatalog(runwayQuery.data) : null),
+    [runwayQuery.data],
+  );
+  const catalog = liveCatalog?.looks.length ? liveCatalog : CATALOG;
+  const requestedLookId =
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("look");
 
   useEffect(() => {
     const el = runwayRef.current;
     if (!el) return;
     const bag = mountBag();
-    const destroyRunway = mountRunway(el, bag);
+    const destroyRunway = mountRunway(el, bag, requestedLookId);
     return () => {
       destroyRunway();
       bag.destroy();
     };
-  }, []);
+  }, [catalog, requestedLookId]);
 
   return (
     <>
       <SiteHeader />
       <main>
-        <Runway ref={runwayRef} />
+        <Runway ref={runwayRef} catalog={catalog} />
         <section id="marques" className="mq-brands" aria-labelledby="marques-title">
           <div className="mq-brands__head">
             <div>
