@@ -507,25 +507,31 @@ function ResourceForm({
 
   async function upload(field: Field, file?: File) {
     if (!file) return;
-    if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
-      setError("Choisissez une image de 10 Mo maximum.");
+    const extensions: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/avif": "avif",
+    };
+    const extension = extensions[file.type];
+    if (!extension || file.size > 10 * 1024 * 1024) {
+      setError("Choisissez un fichier JPEG, PNG, WebP ou AVIF de 10 Mo maximum.");
       return;
     }
     setUploading(field.name);
     setError("");
-    const extension =
-      file.name
-        .split(".")
-        .pop()
-        ?.replace(/[^a-z0-9]/gi, "") || "jpg";
     const path = `${spec.table}/${crypto.randomUUID()}.${extension}`;
-    const { error: uploadError } = await supabase.storage
-      .from("marqci-media")
-      .upload(path, file, { contentType: file.type, upsert: false });
-    if (uploadError) setError(uploadError.message);
-    else
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("marqci-media")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (uploadError) throw uploadError;
       setField(field.name, supabase.storage.from("marqci-media").getPublicUrl(path).data.publicUrl);
-    setUploading(null);
+    } catch {
+      setError("Le téléversement a échoué. Vérifiez vos droits et réessayez.");
+    } finally {
+      setUploading(null);
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {

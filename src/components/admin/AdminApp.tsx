@@ -72,8 +72,18 @@ export function AdminApp() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void queryClient.invalidateQueries({ queryKey: ["admin-session"] });
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        queryClient.setQueryData(["admin-session"], {
+          user: null,
+          isAdmin: false,
+        });
+      }
+      if (event === "SIGNED_IN") {
+        window.setTimeout(() => {
+          void queryClient.invalidateQueries({ queryKey: ["admin-session"] });
+        }, 0);
+      }
     });
     return () => subscription.unsubscribe();
   }, [queryClient]);
@@ -82,10 +92,15 @@ export function AdminApp() {
     event.preventDefault();
     setSigningIn(true);
     setLoginError("");
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setSigningIn(false);
-    if (error) setLoginError("Identifiants invalides ou connexion momentanément indisponible.");
-    else await queryClient.invalidateQueries({ queryKey: ["admin-session"] });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) setLoginError("Identifiants invalides ou connexion momentanément indisponible.");
+      else await queryClient.invalidateQueries({ queryKey: ["admin-session"] });
+    } catch {
+      setLoginError("Connexion Supabase indisponible. Vérifiez le réseau et la configuration.");
+    } finally {
+      setSigningIn(false);
+    }
   }
 
   async function signOut() {
@@ -93,7 +108,7 @@ export function AdminApp() {
     queryClient.clear();
   }
 
-  if (access.isLoading || access.isFetching)
+  if (access.isLoading)
     return (
       <div className="adm-login-wrap">
         <div className="adm-login">
@@ -107,7 +122,10 @@ export function AdminApp() {
       <div className="adm-login-wrap">
         <div className="adm-denied">
           <h1>Connexion indisponible</h1>
-          <p>Le service Supabase n’est pas joignable. Réessayez dans un instant.</p>
+          <p>
+            La vérification de la session ou du rôle administrateur a échoué. Vérifiez la
+            configuration Supabase et les droits RLS, puis réessayez.
+          </p>
           <button className="adm-secondary" type="button" onClick={() => void access.refetch()}>
             Réessayer
           </button>
