@@ -28,7 +28,7 @@ export type Collection = {
   description?: string;
   photos?: CatalogPhoto[];
 };
-export type Variant = { id: number; size: string };
+export type Variant = { id: number | string; size: string };
 export type Product = {
   id: string;
   name: string;
@@ -38,7 +38,7 @@ export type Product = {
   description?: string;
   priceFCFA: number;
   option: "Pointure" | "Taille";
-  photos: [CatalogPhoto, ...CatalogPhoto[]];
+  photos: CatalogPhoto[];
   variants: Variant[];
 };
 
@@ -173,10 +173,10 @@ export type Look = {
   description: string;
   model: string;
   original: string;
-  products: [string, string, string];
+  products: string[];
   /** 1-based row numbers that carry the "Nouveau" tag */
   tagged?: number[];
-  pins: [Pin, Pin, Pin];
+  pins: Pin[];
 };
 
 const pins = (shoeTop = 92): [Pin, Pin, Pin] => [
@@ -270,8 +270,11 @@ export function formatFCFA(amount: number): string {
   return `${digits}\u00a0FCFA`;
 }
 
-export function lookTotals(look: Look): { full: number; bundle: number } {
-  const full = look.products.reduce((sum, id) => sum + (CATALOG.products[id]?.priceFCFA ?? 0), 0);
+export function lookTotals(
+  look: Look,
+  products: Record<string, Product> = CATALOG.products,
+): { full: number; bundle: number } {
+  const full = look.products.reduce((sum, id) => sum + (products[id]?.priceFCFA ?? 0), 0);
   return { full, bundle: Math.round(full * (1 - BUNDLE_DISCOUNT)) };
 }
 

@@ -1,39 +1,67 @@
-import { findVariant, formatFCFA } from "./data";
+import { findVariant, formatFCFA, type Product, type Variant } from "./data";
 
 const STORAGE_KEY = "marqci-styling-bag-v1";
-type Entry = { id: number; quantity: number };
+type LegacyEntry = { id: number; quantity: number };
+type LiveEntry = { id: string; quantity: number; product: Product; size: string };
+type StoredEntry = LegacyEntry | LiveEntry;
+type BagSelection = { id: number | string; quantity: number; product: Product; variant: Variant };
 
 export type BagApi = {
-  add: (items: Entry[]) => void;
+  add: (items: BagSelection[]) => void;
   destroy: () => void;
 };
 
-function load(): Entry[] {
+function isStoredEntry(value: unknown): value is StoredEntry {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as Partial<StoredEntry>;
+  if (
+    !Number.isInteger(entry.quantity) ||
+    (entry.quantity ?? 0) < 1 ||
+    (entry.quantity ?? 0) > 20
+  ) {
+    return false;
+  }
+  if (typeof entry.id === "number")
+    return Number.isSafeInteger(entry.id) && Boolean(findVariant(entry.id));
+  if (
+    typeof entry.id !== "string" ||
+    !("product" in entry) ||
+    !("size" in entry) ||
+    !entry.product ||
+    typeof entry.product !== "object"
+  ) {
+    return false;
+  }
+  return (
+    typeof entry.size === "string" &&
+    typeof entry.product.name === "string" &&
+    Array.isArray(entry.product.variants) &&
+    entry.product.variants.some((variant) => variant.size === entry.size)
+  );
+}
+
+function load(): StoredEntry[] {
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    if (!Array.isArray(raw)) return [];
-    return raw
-      .filter(
-        (e) =>
-          e &&
-          Number.isSafeInteger(e.id) &&
-          Number.isInteger(e.quantity) &&
-          e.quantity >= 1 &&
-          e.quantity <= 20 &&
-          findVariant(e.id),
-      )
-      .slice(0, 50);
+    const raw: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(raw) ? raw.filter(isStoredEntry).slice(0, 50) : [];
   } catch {
     return [];
   }
 }
 
-function save(entries: Entry[]) {
+function save(entries: StoredEntry[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   } catch {
     /* storage unavailable */
   }
+}
+
+function resolveEntry(entry: StoredEntry): { product: Product; variant: Variant } | null {
+  if (typeof entry.id === "number") return findVariant(entry.id);
+  if (!("product" in entry) || !("size" in entry)) return null;
+  const variant = entry.product.variants.find((item) => item.size === entry.size);
+  return variant ? { product: entry.product, variant } : null;
 }
 
 /** Wires the header bag button, the bag dialog and the toast (all rendered as static markup). */
@@ -47,7 +75,7 @@ export function mountBag(): BagApi {
   let toastTimer = 0;
 
   function count() {
-    const n = entries.reduce((s, e) => s + e.quantity, 0);
+    const n = entries.reduce((sum, entry) => sum + entry.quantity, 0);
     document.querySelectorAll("[data-cart-count]").forEach((el) => (el.textContent = String(n)));
   }
 
@@ -65,18 +93,22 @@ export function mountBag(): BagApi {
       return;
     }
     let sum = 0;
-    for (const e of entries) {
-      const found = findVariant(e.id);
-      if (!found) continue;
-      const { product, variant } = found;
-      sum += product.priceFCFA * e.quantity;
+    for (const entry of entries) {
+      const resolved = resolveEntry(entry);
+      if (!resolved) continue;
+      const { product, variant } = resolved;
+      sum += product.priceFCFA * entry.quantity;
       const row = document.createElement("div");
       row.className = "bag-row";
-      const img = document.createElement("img");
-      img.src = product.photos[0].src;
-      img.alt = product.name;
-      img.width = 60;
-      img.height = 80;
+      const imageUrl = product.photos[0]?.src;
+      if (imageUrl) {
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = product.name;
+        img.width = 60;
+        img.height = 80;
+        row.append(img);
+      }
       const info = document.createElement("div");
       const brand = document.createElement("span");
       brand.className = "bag-brand";
@@ -84,19 +116,19 @@ export function mountBag(): BagApi {
       const h3 = document.createElement("h3");
       h3.textContent = product.name;
       const meta = document.createElement("p");
-      meta.textContent = `${product.option} ${variant.size} · Quantité ${e.quantity} · ${formatFCFA(product.priceFCFA)}`;
+      meta.textContent = `${product.option} ${variant.size} · Quantité ${entry.quantity} · ${formatFCFA(product.priceFCFA)}`;
       info.append(brand, h3, meta);
-      const rm = document.createElement("button");
-      rm.type = "button";
-      rm.className = "bag-remove";
-      rm.textContent = "×";
-      rm.setAttribute("aria-label", `Retirer ${product.name}`);
-      rm.addEventListener("click", () => {
-        entries = entries.filter((x) => x !== e);
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "bag-remove";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", `Retirer ${product.name}`);
+      remove.addEventListener("click", () => {
+        entries = entries.filter((item) => item !== entry);
         save(entries);
         render();
       });
-      row.append(img, info, rm);
+      row.append(info, remove);
       list.append(row);
     }
     total.textContent = `Sous-total indicatif ${formatFCFA(sum)}`;
@@ -111,19 +143,30 @@ export function mountBag(): BagApi {
     toastTimer = window.setTimeout(() => toast.classList.remove("is-on"), 2500);
   }
 
-  function add(items: Entry[]) {
-    for (const item of items) {
-      if (!findVariant(item.id)) throw new Error("Choisis une taille disponible.");
-    }
-    for (const item of items) {
-      const existing = entries.find((e) => e.id === item.id);
+  function add(items: BagSelection[]) {
+    const additions: StoredEntry[] = items.map((item) => {
+      const variant = item.product.variants.find((option) => String(option.id) === String(item.id));
+      if (!variant || variant.size !== item.variant.size)
+        throw new Error("Choisis une taille disponible.");
+      if (typeof item.id === "number" && findVariant(item.id)) return { id: item.id, quantity: 1 };
+      return {
+        id: String(item.id),
+        quantity: 1,
+        product: item.product,
+        size: variant.size,
+      };
+    });
+    for (const addition of additions) {
+      const existing = entries.find((entry) => entry.id === addition.id);
       if (existing) existing.quantity = Math.min(20, existing.quantity + 1);
-      else entries.push({ id: item.id, quantity: 1 });
+      else entries.push(addition);
     }
     entries = entries.slice(0, 50);
     save(entries);
     render();
-    showToast(items.length > 1 ? "Look ajouté à ton sac de style" : "Pièce ajoutée à ton sac de style");
+    showToast(
+      items.length > 1 ? "Look ajouté à ton sac de style" : "Pièce ajoutée à ton sac de style",
+    );
   }
 
   const onOpen = () => {
@@ -133,17 +176,30 @@ export function mountBag(): BagApi {
   const onClose = () => dialog?.close();
   const onBackdrop = (e: MouseEvent) => {
     if (!dialog || e.target !== dialog) return;
-    const r = dialog.getBoundingClientRect();
-    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+    const rect = dialog.getBoundingClientRect();
+    if (
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom
+    )
+      dialog.close();
   };
   const onExport = () => {
     const lines = entries
-      .map((e) => {
-        const f = findVariant(e.id);
-        return f ? `${f.product.brand} — ${f.product.name} · ${f.product.option} ${f.variant.size} · Quantité ${e.quantity}` : "";
+      .map((entry) => {
+        const resolved = resolveEntry(entry);
+        return resolved
+          ? `${resolved.product.brand} — ${resolved.product.name} · ${resolved.product.option} ${resolved.variant.size} · Quantité ${entry.quantity}`
+          : "";
       })
       .filter(Boolean);
-    const text = ["MARQ’CI — MA SÉLECTION", "Prix indicatifs ; aucune commande ni paiement n’a été effectué.", "", ...lines].join("\n\n");
+    const text = [
+      "MARQ’CI — MA SÉLECTION",
+      "Prix indicatifs ; aucune commande ni paiement n’a été effectué.",
+      "",
+      ...lines,
+    ].join("\n\n");
     const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url;
