@@ -9,12 +9,21 @@ export function SiteHeader() {
       <nav className="site-nav" aria-label="Navigation principale">
         <a href="/">Accueil</a>
         <a href="#marques">Marques</a>
-        <a href="#lookbook" aria-current="page">
-          Lookbook
-        </a>
+        <a href="#collections">Collections</a>
+        <a href="#vetements">Vêtements</a>
+        <a href="#categories">Catégories</a>
+        <a href="#lookbook">Lookbook</a>
       </nav>
       <button type="button" id="open-bag" className="bag-btn" aria-label="Ouvrir le sac de style">
-        <svg width="22" height="24" viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+        <svg
+          width="22"
+          height="24"
+          viewBox="0 0 24 26"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          aria-hidden="true"
+        >
           <path d="M4 8h16l1 16H3L4 8zM8 8V6a4 4 0 0 1 8 0v2" />
         </svg>
         <span data-cart-count="">0</span>
@@ -29,12 +38,18 @@ export function BagDialog() {
       <dialog id="bag-dialog" className="bag-dialog" aria-labelledby="bag-title">
         <div className="bag-heading">
           <h2 id="bag-title">Ton sac de style</h2>
-          <button type="button" id="close-bag" className="bag-close" aria-label="Fermer le sac de style">
+          <button
+            type="button"
+            id="close-bag"
+            className="bag-close"
+            aria-label="Fermer le sac de style"
+          >
             ×
           </button>
         </div>
         <p className="bag-note">
-          Une sélection locale de tes pièces préférées. Aucune commande ni paiement n’est effectué ici.
+          Une sélection locale de tes pièces préférées. Aucune commande ni paiement n’est effectué
+          ici.
         </p>
         <div id="bag-items" />
         <p id="bag-total" className="bag-total" />

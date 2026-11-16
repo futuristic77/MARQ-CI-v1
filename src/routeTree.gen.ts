@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as MarquesSlugRouteImport } from './routes/marques.$slug'
+import { Route as DecouvrirKindSlugRouteImport } from './routes/decouvrir.$kind.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const MarquesSlugRoute = MarquesSlugRouteImport.update({
   path: '/marques/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DecouvrirKindSlugRoute = DecouvrirKindSlugRouteImport.update({
+  id: '/decouvrir/$kind/$slug',
+  path: '/decouvrir/$kind/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/marques/$slug': typeof MarquesSlugRoute
+  '/decouvrir/$kind/$slug': typeof DecouvrirKindSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/marques/$slug': typeof MarquesSlugRoute
+  '/decouvrir/$kind/$slug': typeof DecouvrirKindSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/marques/$slug': typeof MarquesSlugRoute
+  '/decouvrir/$kind/$slug': typeof DecouvrirKindSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/marques/$slug'
+  fullPaths: '/' | '/admin' | '/marques/$slug' | '/decouvrir/$kind/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/marques/$slug'
-  id: '__root__' | '/' | '/admin' | '/marques/$slug'
+  to: '/' | '/admin' | '/marques/$slug' | '/decouvrir/$kind/$slug'
+  id: '__root__' | '/' | '/admin' | '/marques/$slug' | '/decouvrir/$kind/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   MarquesSlugRoute: typeof MarquesSlugRoute
+  DecouvrirKindSlugRoute: typeof DecouvrirKindSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarquesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/decouvrir/$kind/$slug': {
+      id: '/decouvrir/$kind/$slug'
+      path: '/decouvrir/$kind/$slug'
+      fullPath: '/decouvrir/$kind/$slug'
+      preLoaderRoute: typeof DecouvrirKindSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   MarquesSlugRoute: MarquesSlugRoute,
+  DecouvrirKindSlugRoute: DecouvrirKindSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
